@@ -1,0 +1,1 @@
+This a lambda function which store image info into a DynamoDB table.
