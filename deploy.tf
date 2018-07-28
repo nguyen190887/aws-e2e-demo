@@ -8,9 +8,9 @@ resource "aws_s3_bucket" "ImageBucket" {
   acl    = "private"
 }
 
-# Lambda iam role
-resource "aws_iam_role" "iam_Lambda" {
-  name = "e2edemo_LambdaRole"
+# Lambda function: Create Image Info
+resource "aws_iam_role" "iam_Lambda_CreateImage" {
+  name = "e2edemo_Lambda_CreateImage"
 
   assume_role_policy = <<EOF
 {
@@ -28,10 +28,9 @@ resource "aws_iam_role" "iam_Lambda" {
 EOF
 }
 
-# Lambda function: Create Image Info
 resource "aws_iam_role_policy" "iam_policy_CrateImageInfo" {
   name = "iam_policy_CrateImageInfo"
-  role = "${aws_iam_role.iam_Lambda.id}"
+  role = "${aws_iam_role.iam_Lambda_CreateImage.id}"
 
   policy = <<EOF
 {
@@ -59,7 +58,7 @@ EOF
 resource "aws_lambda_function" "CreateImageInfo" {
   filename         = "Lambda.CreateImageInfo.zip"
   function_name    = "e2edemo_CreateImageInfo"
-  role             = "${aws_iam_role.iam_Lambda.arn}"
+  role             = "${aws_iam_role.iam_Lambda_CreateImage.arn}"
   handler          = "Lambda.CreateImageInfo::Lambda.CreateImageInfo.Function::FunctionHandler"
   source_code_hash = "${base64sha256(file("Lambda.CreateImageInfo.zip"))}"
   runtime          = "dotnetcore2.0"
@@ -67,9 +66,28 @@ resource "aws_lambda_function" "CreateImageInfo" {
 }
 
 # Lambda function: Resize Image
+resource "aws_iam_role" "iam_Lambda_ResizeImage" {
+  name = "e2edemo_Lambda_ResizeImage"
+
+  assume_role_policy = <<EOF
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": "sts:AssumeRole",
+			"Principal": {
+				"Service": "lambda.amazonaws.com"
+			}
+		}
+	]
+}
+EOF
+}
+
 resource "aws_iam_role_policy" "iam_policy_ResizeImage" {
   name = "iam_policy_ResizeImage"
-  role = "${aws_iam_role.iam_Lambda.id}"
+  role = "${aws_iam_role.iam_Lambda_ResizeImage.id}"
 
   policy = <<EOF
 {
@@ -97,7 +115,7 @@ EOF
 resource "aws_lambda_function" "ResizeImage" {
   filename         = "Lambda.ResizeImage.zip"
   function_name    = "e2edemo_ResizeImage"
-  role             = "${aws_iam_role.iam_Lambda.arn}"
+  role             = "${aws_iam_role.iam_Lambda_ResizeImage.arn}"
   handler          = "index.handler"
   source_code_hash = "${base64sha256(file("Lambda.ResizeImage.zip"))}"
   runtime          = "nodejs8.10"
