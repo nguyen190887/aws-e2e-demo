@@ -395,3 +395,4 @@ ASALocalRun/
 
 # Lambda zips
 Lambda.CreateImageInfo.zip
+Lambda.ResizeImage.zip

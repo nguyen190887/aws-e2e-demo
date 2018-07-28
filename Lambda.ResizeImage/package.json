@@ -9,7 +9,6 @@
   "author": "Tri Nguyen",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.279.1",
     "imagemagick": "^0.1.3"
   }
 }
